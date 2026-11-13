@@ -108,7 +108,7 @@ const allProjects: Project[] = [
       'Summyra Campus (CampusOS) is a modular school management platform where school owners, principals, vice principals, teachers, accounting staff, students, guardians, and other personnel sign in with their own accounts and see features appropriate to their responsibilities. Teachers can manage homework, students can view assignments and grades, and accounting staff work with payment and financial records through their authorized areas.',
       'The system uses Next.js/React, NestJS, and PostgreSQL. Its codebase includes role-based and scope-based permissions, server-side access checks, session and CSRF controls, PostgreSQL row-level security for tenant isolation, and audit-related infrastructure.',
     ],
-    role: 'Software Developer / Product Builder',
+    role: 'Solo developer & product builder',
     technologies: ['Next.js', 'React', 'TypeScript', 'NestJS', 'PostgreSQL', 'Drizzle ORM', 'RBAC', 'PostgreSQL RLS'],
     features: [
       'Multi-tenant architecture that keeps each school’s data separate',
@@ -135,7 +135,7 @@ const allProjects: Project[] = [
       'Web Push is implemented without a library: RFC 8291 (aes128gcm) encryption and RFC 8292 VAPID signing (ES256 JWT) written on WebCrypto, so the same code runs on Node and Cloudflare Workers. Security includes scrypt password hashing tuned to Cloudflare’s per-request CPU limit, HMAC-SHA256 signed session cookies (httpOnly, secure, sameSite), login rate limiting, an authorization check in every server action, search-engine blocking and CSV formula-injection protection.',
       'It is built as a product rather than a one-off: business details live in a single config file, one command generates the password and push keys and uploads every secret to Cloudflare, and a new hotel can be set up in about an hour. End-to-end Playwright tests cover login, booking, a same-room double booking from two tabs, payments, cancel and undo, search, CSV, three screen widths and both themes, run against real Postgres on Node and on Cloudflare’s local runtime (workerd).',
     ],
-    role: 'Developer / Product Builder',
+    role: 'Solo developer & product builder',
     technologies: [
       'TypeScript',
       'Next.js 16',
@@ -175,14 +175,16 @@ const allProjects: Project[] = [
     description: [
       'Developed a smart-office monitoring system that detects people through camera feeds and issues alerts for unauthorized or unexpected access. The project includes email notifications and automated phone-call alerts, including a night-monitoring use case.',
       'Its public Python module uses YOLOv8n and OpenCV for real-time person detection, bounding boxes, confidence values, and FPS reporting. The alerting parts of the system are not part of that public repository.',
+      'This was a team project. I worked on every part of it, from the electrical wiring and camera setup to the dashboard, the Python code and the AI integration, and I built the AI person-detection component myself.',
     ],
-    role: 'Developer',
+    role: 'Team project — built the AI person detection; worked across the whole system',
     technologies: ['Python', 'Ultralytics YOLOv8n', 'OpenCV'],
     features: [
       'Camera-based person detection for day and night monitoring',
       'Alerts for unauthorized or unrecognized entry',
       'Automatic email notifications',
       'Automated phone-call alerts',
+      'Monitoring dashboard',
       'Real-time person-detection component built with Python, OpenCV and YOLOv8n',
     ],
     sourceUrl: 'https://github.com/dorukanklnc/smart-office-person-detection',
@@ -204,7 +206,7 @@ const allProjects: Project[] = [
       'Developing a 3D physics-based siege game featuring destructible castles, projectile attacks, and structural damage.',
       'Planned next: offline castle construction and defense testing, progression systems, and eventually asynchronous player-created challenges.',
     ],
-    role: 'Developer',
+    role: 'Solo developer',
     technologies: ['Unity 6', 'C#', '3D PhysX'],
     features: [
       'Destructible castles with structural damage',
@@ -225,7 +227,7 @@ const allProjects: Project[] = [
     description: [
       'Players receive secret roles linked to a shared location, while one player becomes the impostor. Each person gives a brief clue connected to their role, and the impostor tries to blend in and infer the location without being exposed.',
     ],
-    role: 'Developer',
+    role: 'Solo developer',
     technologies: ['Swift', 'SwiftUI', 'Xcode', 'iOS'],
     features: [
       'Secret roles tied to a shared location',
@@ -246,7 +248,7 @@ const allProjects: Project[] = [
     description: [
       'Children explore an island and complete interactive learning activities. The app features child-friendly navigation, several educational mini-games, and XP-based progression.',
     ],
-    role: 'Developer',
+    role: 'Solo developer',
     technologies: ['Java', 'Android Studio', 'Android'],
     features: [
       'Mini-games for addition and multiplication, telling time, seasons, animal habitats and directions',
@@ -264,7 +266,7 @@ const allProjects: Project[] = [
     type: 'IoT · Access control',
     summary:
       'An RFID access and attendance system that logs entries and exits, prevents duplicate entry, and supports automated notifications.',
-    role: 'Developer',
+    role: 'Solo developer',
     technologies: ['Arduino', 'RFID RC522', 'Python', 'Serial communication'],
     features: [
       'Card-based entry and exit logging with timestamps',
