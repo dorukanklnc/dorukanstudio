@@ -9,6 +9,7 @@ import type { LayoutName, ScenePoint } from '../content/types'
 import {
   CART,
   CONSOLE_POS,
+  FLOOR_BLEED,
   LAYOUT_BREAKPOINTS,
   LAYOUTS,
   MAX_FIT_SCALE,
@@ -144,7 +145,7 @@ export function computeFit(vw: number, vh: number, pager = false): Fit {
   const bottomAligned = ins.top + availH - (safe.y + safe.h) * scale
   // Spare height goes mostly above the console, where the wall and shelves are.
   const x = clamp(cx - (safe.x + safe.w / 2) * scale, vw - STAGE.w * scale, 0)
-  const y = clamp(centred + (bottomAligned - centred) * 0.9, vh - STAGE.h * scale, 0)
+  const y = clamp(centred + (bottomAligned - centred) * 0.9, vh - (STAGE.h + FLOOR_BLEED) * scale, 0)
   return { scale, x, y, vw, vh, layout }
 }
 

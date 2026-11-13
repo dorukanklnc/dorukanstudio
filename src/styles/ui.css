@@ -165,7 +165,9 @@
 
 .hud-info {
   width: min(600px, 100%);
-  min-height: 62px;
+  /* Fixed height: swapping the hint for a project summary must not move the pager above it. */
+  height: 84px;
+  overflow: hidden;
   padding: 10px 20px 11px;
   border: 2px solid rgba(246, 238, 217, 0.22);
   border-radius: 18px;
@@ -216,6 +218,10 @@
 }
 
 .hud-info-summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   margin-top: 3px !important;
   font: 500 14px/1.4 var(--font-body);
   color: #efe4c8;
@@ -285,7 +291,7 @@
     padding: 0 10px max(12px, env(safe-area-inset-bottom));
   }
   .hud-info {
-    min-height: 70px;
+    height: 92px;
     padding: 9px 14px;
   }
   .hud-hint {

@@ -9,6 +9,9 @@ import type { LayoutName, ScenePoint } from '../content/types'
 
 export const STAGE = { w: 2400, h: 1600 } as const
 
+/** Extra floor drawn below the stage so tall phone screens can show more of it. */
+export const FLOOR_BLEED = 420
+
 /** The console SVG is a 520 × 520 box whose top-left corner sits here (stage units). */
 export const CONSOLE_POS: ScenePoint = { x: 930, y: 700 }
 export const CONSOLE_BOX = { w: 520, h: 520 } as const
@@ -69,15 +72,15 @@ export const LAYOUTS: Record<LayoutName, LayoutConfig> = {
     ],
   },
   tall: {
-    safe: { x: 960, y: 440, w: 470, h: 965 },
+    safe: { x: 960, y: 440, w: 470, h: 1000 },
     shelf: { x: 972, y: 612, w: 446, h: 30 },
     slots: [
       { x: 990, y: 466, shadow: 20, amp: 6 },
       { x: 1145, y: 466, shadow: 20, amp: 6 },
       { x: 1300, y: 466, shadow: 20, amp: 6 },
-      { x: 1040, y: 1196, shadow: 34, amp: 6 },
-      { x: 1250, y: 1196, shadow: 34, amp: 6 },
-      { x: 1145, y: 1236, shadow: 30, amp: 6 },
+      { x: 990, y: 1196, shadow: 34, amp: 6 },
+      { x: 1300, y: 1196, shadow: 34, amp: 6 },
+      { x: 1145, y: 1196, shadow: 34, amp: 6 },
     ],
     // Keep the bottom row centred when it isn't full.
     order: { 1: [1], 4: [0, 1, 2, 5] },

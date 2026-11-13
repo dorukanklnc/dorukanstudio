@@ -5,7 +5,7 @@
  * All shapes are generated once with a seeded RNG, so the drawing is stable.
  */
 import { memo, useMemo } from 'react'
-import { STAGE } from './config'
+import { FLOOR_BLEED, STAGE } from './config'
 import { blob, grainLines, hatch, rng, roundPoly, wobbleLine, type Pt } from './draw'
 
 const INK = '#2A1A10'
@@ -345,7 +345,7 @@ const VP = { x: 1200, y: 120 }
 function floorRows() {
   const rows: number[] = [SEAM]
   let h = 30
-  while (rows[rows.length - 1] < STAGE.h + 20) {
+  while (rows[rows.length - 1] < STAGE.h + FLOOR_BLEED + 20) {
     rows.push(rows[rows.length - 1] + h)
     h *= 1.13
   }
@@ -602,8 +602,8 @@ export const RoomLight = memo(function RoomLight() {
           <stop offset="1" stopColor="#FFD9A0" stopOpacity="0" />
         </radialGradient>
       </defs>
-      <rect x="0" y="0" width={STAGE.w} height={STAGE.h} fill="url(#room-warm)" />
-      <rect x="0" y="0" width={STAGE.w} height={STAGE.h} fill="url(#room-vignette)" />
+      <rect x="0" y="0" width={STAGE.w} height={STAGE.h + FLOOR_BLEED} fill="url(#room-warm)" />
+      <rect x="0" y="0" width={STAGE.w} height={STAGE.h + FLOOR_BLEED} fill="url(#room-vignette)" />
     </svg>
   )
 })
