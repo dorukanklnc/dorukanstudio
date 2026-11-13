@@ -50,13 +50,13 @@ export function Hud({ hudRef, hovered, interactive, touch, page, pages, onPage, 
         {pages > 1 && (
           <div className="pager" role="group" aria-label="Cartridge shelf">
             <button type="button" onClick={() => onPage(page - 1)} disabled={page === 0} aria-label="Previous shelf">
-              ◀
+              <span aria-hidden="true">◀</span> Prev
             </button>
             <span aria-live="polite">
-              Shelf {page + 1} / {pages}
+              Shelf {page + 1} of {pages}
             </span>
             <button type="button" onClick={() => onPage(page + 1)} disabled={page >= pages - 1} aria-label="Next shelf">
-              ▶
+              More <span aria-hidden="true">▶</span>
             </button>
           </div>
         )}

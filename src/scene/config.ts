@@ -80,7 +80,7 @@ export const LAYOUTS: Record<LayoutName, LayoutConfig> = {
       { x: 1145, y: 1236, shadow: 30, amp: 6 },
     ],
     // Keep the bottom row centred when it isn't full.
-    order: { 4: [0, 1, 2, 5] },
+    order: { 1: [1], 4: [0, 1, 2, 5] },
   },
 }
 

@@ -85,12 +85,29 @@ export function AboutPanel({ onClose }: { onClose: () => void }) {
           ))}
         </dl>
       )}
-      <h3>Tools I use</h3>
-      <ul className="chips">
-        {profile.skills.map((s) => (
-          <li key={s}>{s}</li>
-        ))}
-      </ul>
+      {profile.skillGroups && profile.skillGroups.length > 0 ? (
+        <div className="skill-groups">
+          {profile.skillGroups.map((g) => (
+            <section key={g.label} aria-label={g.label}>
+              <h3>{g.label}</h3>
+              <ul className="chips">
+                {g.items.map((s) => (
+                  <li key={s}>{s}</li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <>
+          <h3>Tools I use</h3>
+          <ul className="chips">
+            {profile.skills.map((s) => (
+              <li key={s}>{s}</li>
+            ))}
+          </ul>
+        </>
+      )}
       <p className="panel-foot">
         <a href={pathFor({ name: 'contact' })} onClick={linkHandler({ name: 'contact' }, 'link', true)}>
           Get in touch →

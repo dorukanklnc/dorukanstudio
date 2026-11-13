@@ -117,7 +117,7 @@ export function ProjectView({ project, settled, shellRef }: Props) {
               {project.sourceUrl && (
                 <a className="btn" href={project.sourceUrl} target="_blank" rel="noreferrer">
                   <span className="btn-dot btn-dot-blue" aria-hidden="true" />
-                  Source code
+                  {project.sourceLabel ?? 'Source code'}
                   <span className="visually-hidden"> (opens in a new tab)</span>
                 </a>
               )}

@@ -43,6 +43,8 @@ export interface Project {
   /** Only rendered when set. Never put placeholder URLs here. */
   liveUrl?: string
   sourceUrl?: string
+  /** Button text for sourceUrl (default "Source code"), e.g. when only part of the code is public. */
+  sourceLabel?: string
   /** Cartridge label colour (any CSS colour). */
   labelColor: string
   /** One to three characters shown as the cartridge emblem and on the console's boot screen. */
@@ -70,6 +72,8 @@ export interface Profile {
   /** Short "currently" style notes for the About page. */
   notes?: { label: string; value: string }[]
   skills: string[]
+  /** Optional grouped skills for the About page; when set it is shown instead of `skills`. */
+  skillGroups?: { label: string; items: string[] }[]
   contact: ContactLink[]
   /** Shown on the Contact page above the links. */
   contactIntro: string
