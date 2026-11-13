@@ -23,9 +23,9 @@ export const profile: Profile = {
   notes: [
     { label: 'Primary focus', value: 'Cybersecurity & secure software engineering' },
     { label: 'AI development', value: 'LLMs, AI agents and backend integrations' },
-    { label: 'Also building', value: 'Full-stack products and mobile games' },
+    { label: 'Also building', value: 'Full-stack products and games' },
     { label: 'Education', value: 'B.Sc. Computer Engineering, Bahçeşehir University (2021–2026)' },
-    { label: 'Studio', value: 'Summyra — my software studio', href: 'https://summyra.com/' },
+    { label: 'Studio', value: 'Summyra — my software work', href: 'https://summyra.com/' },
   ],
   skills: [
     'RBAC',
@@ -103,7 +103,7 @@ const allProjects: Project[] = [
     title: 'Summyra Campus',
     type: 'Multi-tenant school management SaaS',
     summary:
-      'A multi-tenant school management platform with personalized portals, role-based access, and academic and financial workflows.',
+      'A multi-tenant management platform for schools, with personalized portals, role-based access, and academic and financial workflows.',
     description: [
       'Summyra Campus (CampusOS) is a modular school management platform where school owners, principals, vice principals, teachers, accounting staff, students, guardians, and other personnel sign in with their own accounts and see features appropriate to their responsibilities. Teachers can manage homework, students can view assignments and grades, and accounting staff work with payment and financial records through their authorized areas.',
       'The system uses Next.js/React, NestJS, and PostgreSQL. Its codebase includes role-based and scope-based permissions, server-side access checks, session and CSRF controls, PostgreSQL row-level security for tenant isolation, and audit-related infrastructure.',
@@ -128,9 +128,9 @@ const allProjects: Project[] = [
     title: 'Summyra Panel',
     type: 'Hotel reservation management · PWA',
     summary:
-      'A mobile-first reservation book for small hotels, with a tap-to-book room calendar, payment and deposit tracking, WhatsApp templates and a daily push summary. Live and in use by its first hotel.',
+      'A mobile-first reservation management app for hotels, with a tap-to-book room calendar, payment and deposit tracking, WhatsApp templates and a daily push summary. Live and in use at a hotel.',
     description: [
-      'Small hotels often take bookings over WhatsApp and the phone and keep them in a notebook. Summyra Panel replaces that notebook: the owner records a reservation with a few taps instead of typing, on a web app that installs on the phone like a native app (PWA). It is live and in daily use by its first client, a small cave hotel in Cappadocia, and runs at no monthly hosting cost on the free tiers of Cloudflare and Neon.',
+      'Hotels often take bookings over WhatsApp and the phone and keep them in a notebook. Summyra Panel replaces that notebook: staff record a reservation with a few taps instead of typing, on a web app that installs on the phone like a native app (PWA). It is live and in daily use at a hotel, and runs at no monthly hosting cost on the free tiers of Cloudflare and Neon.',
       'Double bookings are prevented in the database itself: a PostgreSQL EXCLUDE constraint (btree_gist) on the stay’s date range rejects overlapping reservations even when two devices save at the same moment. Check-out dates and totals are generated columns, and a small versioned migration system runs each step in one transaction under a lock. The data layer picks Neon’s HTTP driver, postgres-js or PGlite (embedded Postgres in WebAssembly) from the connection URL, which solved connection reuse in the serverless runtime.',
       'Web Push is implemented without a library: RFC 8291 (aes128gcm) encryption and RFC 8292 VAPID signing (ES256 JWT) written on WebCrypto, so the same code runs on Node and Cloudflare Workers. Security includes scrypt password hashing tuned to Cloudflare’s per-request CPU limit, HMAC-SHA256 signed session cookies (httpOnly, secure, sameSite), login rate limiting, an authorization check in every server action, search-engine blocking and CSV formula-injection protection.',
       'It is built as a product rather than a one-off: business details live in a single config file, one command generates the password and push keys and uploads every secret to Cloudflare, and a new hotel can be set up in about an hour. End-to-end Playwright tests cover login, booking, a same-room double booking from two tabs, payments, cancel and undo, search, CSV, three screen widths and both themes, run against real Postgres on Node and on Cloudflare’s local runtime (workerd).',
@@ -176,6 +176,7 @@ const allProjects: Project[] = [
       'Developed a smart-office monitoring system that detects people through camera feeds and issues alerts for unauthorized or unexpected access. The project includes email notifications and automated phone-call alerts, including a night-monitoring use case.',
       'Its public Python module uses YOLOv8n and OpenCV for real-time person detection, bounding boxes, confidence values, and FPS reporting. The alerting parts of the system are not part of that public repository.',
     ],
+    role: 'Developer',
     technologies: ['Python', 'Ultralytics YOLOv8n', 'OpenCV'],
     features: [
       'Camera-based person detection for day and night monitoring',
@@ -203,6 +204,7 @@ const allProjects: Project[] = [
       'Developing a 3D physics-based siege game featuring destructible castles, projectile attacks, and structural damage.',
       'Planned next: offline castle construction and defense testing, progression systems, and eventually asynchronous player-created challenges.',
     ],
+    role: 'Developer',
     technologies: ['Unity 6', 'C#', '3D PhysX'],
     features: [
       'Destructible castles with structural damage',
@@ -223,6 +225,7 @@ const allProjects: Project[] = [
     description: [
       'Players receive secret roles linked to a shared location, while one player becomes the impostor. Each person gives a brief clue connected to their role, and the impostor tries to blend in and infer the location without being exposed.',
     ],
+    role: 'Developer',
     technologies: ['Swift', 'SwiftUI', 'Xcode', 'iOS'],
     features: [
       'Secret roles tied to a shared location',
@@ -243,6 +246,7 @@ const allProjects: Project[] = [
     description: [
       'Children explore an island and complete interactive learning activities. The app features child-friendly navigation, several educational mini-games, and XP-based progression.',
     ],
+    role: 'Developer',
     technologies: ['Java', 'Android Studio', 'Android'],
     features: [
       'Mini-games for addition and multiplication, telling time, seasons, animal habitats and directions',
@@ -260,6 +264,7 @@ const allProjects: Project[] = [
     type: 'IoT · Access control',
     summary:
       'An RFID access and attendance system that logs entries and exits, prevents duplicate entry, and supports automated notifications.',
+    role: 'Developer',
     technologies: ['Arduino', 'RFID RC522', 'Python', 'Serial communication'],
     features: [
       'Card-based entry and exit logging with timestamps',
