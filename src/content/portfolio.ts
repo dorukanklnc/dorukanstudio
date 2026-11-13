@@ -25,6 +25,7 @@ export const profile: Profile = {
     { label: 'AI development', value: 'LLMs, AI agents and backend integrations' },
     { label: 'Also building', value: 'Full-stack products and mobile games' },
     { label: 'Education', value: 'B.Sc. Computer Engineering, Bahçeşehir University (2021–2026)' },
+    { label: 'Studio', value: 'Summyra — my software studio', href: 'https://summyra.com/' },
   ],
   skills: [
     'RBAC',
@@ -87,8 +88,6 @@ export const profile: Profile = {
     { label: 'Email', href: 'mailto:dorukankilinc28@gmail.com', text: 'dorukankilinc28@gmail.com' },
     { label: 'LinkedIn', href: 'https://linkedin.com/in/dorukankilinc/', text: 'linkedin.com/in/dorukankilinc' },
     { label: 'GitHub', href: 'https://github.com/dorukanklnc', text: 'github.com/dorukanklnc' },
-    { label: 'Summyra', href: 'https://summyra.com/', text: 'summyra.com — my software studio' },
-    { label: 'Instagram', href: 'https://instagram.com/dorukan_klnc', text: '@dorukan_klnc' },
   ],
 }
 
@@ -127,19 +126,45 @@ const allProjects: Project[] = [
   {
     slug: 'summyra-panel',
     title: 'Summyra Panel',
-    type: 'Hotel reservation data system',
-    summary: 'A separate Summyra product for managing and working with hotel reservation data.',
+    type: 'Hotel reservation management · PWA',
+    summary:
+      'A mobile-first reservation book for small hotels, with a tap-to-book room calendar, payment and deposit tracking, WhatsApp templates and a daily push summary. Live and in use by its first hotel.',
     description: [
-      'Summyra Panel focuses on hotel reservation data and operational information. It is a distinct product from Summyra Campus, which serves schools. The feature list and technology stack will be documented from the current implementation.',
+      'Small hotels often take bookings over WhatsApp and the phone and keep them in a notebook. Summyra Panel replaces that notebook: the owner records a reservation with a few taps instead of typing, on a web app that installs on the phone like a native app (PWA). It is live and in daily use by its first client, a small cave hotel in Cappadocia, and runs at no monthly hosting cost on the free tiers of Cloudflare and Neon.',
+      'Double bookings are prevented in the database itself: a PostgreSQL EXCLUDE constraint (btree_gist) on the stay’s date range rejects overlapping reservations even when two devices save at the same moment. Check-out dates and totals are generated columns, and a small versioned migration system runs each step in one transaction under a lock. The data layer picks Neon’s HTTP driver, postgres-js or PGlite (embedded Postgres in WebAssembly) from the connection URL, which solved connection reuse in the serverless runtime.',
+      'Web Push is implemented without a library: RFC 8291 (aes128gcm) encryption and RFC 8292 VAPID signing (ES256 JWT) written on WebCrypto, so the same code runs on Node and Cloudflare Workers. Security includes scrypt password hashing tuned to Cloudflare’s per-request CPU limit, HMAC-SHA256 signed session cookies (httpOnly, secure, sameSite), login rate limiting, an authorization check in every server action, search-engine blocking and CSV formula-injection protection.',
+      'It is built as a product rather than a one-off: business details live in a single config file, one command generates the password and push keys and uploads every secret to Cloudflare, and a new hotel can be set up in about an hour. End-to-end Playwright tests cover login, booking, a same-room double booking from two tabs, payments, cancel and undo, search, CSV, three screen widths and both themes, run against real Postgres on Node and on Cloudflare’s local runtime (workerd).',
     ],
     role: 'Developer / Product Builder',
-    // Fill in from the real implementation; nothing is listed until it is verified.
-    technologies: [],
+    technologies: [
+      'TypeScript',
+      'Next.js 16',
+      'React 19',
+      'PostgreSQL',
+      'Neon',
+      'PGlite',
+      'Cloudflare Workers',
+      'Tailwind CSS 4',
+      'Zod',
+      'PWA',
+      'Web Push',
+      'Playwright',
+    ],
+    features: [
+      'Today screen: occupancy, arrivals and departures, amounts to collect, pending deposits and tomorrow’s guests',
+      'Room × day calendar over three weeks with half-day bars; tapping an empty cell opens a booking form for that room and date',
+      'Tap-to-book form where occupied rooms close in real time, with one-tap date, nights and guest choices',
+      'Database-level protection against double bookings',
+      'Payment and deposit tracking with due dates, overdue warnings and partial or full payments',
+      'Ready-made WhatsApp messages (confirmation, check-in and deposit reminders, review request), marked once sent',
+      'Morning summary pushed to the phone at 08:00 every day',
+      'Turkish-character-insensitive search, Excel-friendly CSV export and a monthly report (occupancy, revenue, average nightly rate, breakdown by source and room)',
+      'Mobile-first design with light and dark themes',
+    ],
     thumbnail: demo('summyra-panel', 'Demo illustration of a hotel reservation dashboard with a booking calendar'),
     screenshots: [demo('summyra-panel', 'Demo illustration of a hotel reservation dashboard with a booking calendar')],
     labelColor: '#6CA6D9',
     emblem: 'SP',
-    placeholder: true,
   },
   {
     slug: 'smart-office-security',

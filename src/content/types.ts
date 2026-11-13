@@ -70,7 +70,7 @@ export interface Profile {
   /** About page paragraphs. */
   about: string[]
   /** Short "currently" style notes for the About page. */
-  notes?: { label: string; value: string }[]
+  notes?: { label: string; value: string; /** Optional external link for the value. */ href?: string }[]
   skills: string[]
   /** Optional grouped skills for the About page; when set it is shown instead of `skills`. */
   skillGroups?: { label: string; items: string[] }[]

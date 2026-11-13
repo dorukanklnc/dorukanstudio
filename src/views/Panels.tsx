@@ -80,7 +80,16 @@ export function AboutPanel({ onClose }: { onClose: () => void }) {
           {profile.notes.map((n) => (
             <div key={n.label}>
               <dt>{n.label}</dt>
-              <dd>{n.value}</dd>
+              <dd>
+                {n.href ? (
+                  <a href={n.href} target="_blank" rel="noreferrer">
+                    {n.value}
+                    <span className="visually-hidden"> (opens in a new tab)</span>
+                  </a>
+                ) : (
+                  n.value
+                )}
+              </dd>
             </div>
           ))}
         </dl>
