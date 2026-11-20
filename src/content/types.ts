@@ -77,4 +77,18 @@ export interface Profile {
   contact: ContactLink[]
   /** Shown on the Contact page above the links. */
   contactIntro: string
+  /** Work experience, newest first. */
+  experience?: Experience[]
+  /** Awards and honours, one line each. */
+  honors?: string[]
+}
+
+export interface Experience {
+  title: string
+  company: string
+  location?: string
+  /** Human-readable period, e.g. "February 2026 – March 2026". */
+  period: string
+  points: string[]
+  technologies?: string[]
 }

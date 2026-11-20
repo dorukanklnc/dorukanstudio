@@ -4,6 +4,8 @@
  *   /projects          project list
  *   /projects/:slug    project detail
  *   /about, /contact   info panels over the room
+ *   /experience-lab            3D "Night Shift HQ" (in development, not linked, noindex)
+ *   /experience-lab/:room      a room close-up; /experience-lab/portfolio = quick HTML view
  */
 import { useSyncExternalStore, type MouseEvent } from 'react'
 
@@ -13,6 +15,7 @@ export type Route =
   | { name: 'about' }
   | { name: 'contact' }
   | { name: 'project'; slug: string }
+  | { name: 'lab'; room?: string }
   | { name: 'notFound'; path: string }
 
 /** How the current history entry was reached. */
@@ -39,6 +42,8 @@ export function parsePath(pathname: string): Route {
   if (p === '/contact') return { name: 'contact' }
   const m = p.match(/^\/projects\/([a-z0-9-]+)$/i)
   if (m) return { name: 'project', slug: m[1].toLowerCase() }
+  const lab = p.match(/^\/experience-lab(?:\/([a-z0-9-]+))?$/i)
+  if (lab) return lab[1] ? { name: 'lab', room: lab[1].toLowerCase() } : { name: 'lab' }
   return { name: 'notFound', path: p }
 }
 
@@ -54,6 +59,8 @@ export function pathFor(route: Route): string {
       return `${BASE}/contact`
     case 'project':
       return `${BASE}/projects/${route.slug}`
+    case 'lab':
+      return route.room ? `${BASE}/experience-lab/${route.room}` : `${BASE}/experience-lab`
     default:
       return `${BASE}/`
   }

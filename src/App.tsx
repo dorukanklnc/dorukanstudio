@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Hud } from './components/Hud'
 import { findProject, profile, projects } from './content/portfolio'
 import type { Project } from './content/types'
 import { goHome, navigate, parsePath, useRoute, type Via } from './lib/router'
+import { useMedia } from './lib/useMedia'
 import { SceneDirector, type Phase } from './scene/director'
 import type { Fit } from './scene/geometry'
 import { computePlacements, pageCount, pageOf } from './scene/placement'
@@ -13,24 +14,29 @@ import { ProjectView } from './views/ProjectView'
 
 const projectMap = new Map(projects.map((p) => [p.slug, p]))
 
-function useMedia(query: string) {
-  const [match, setMatch] = useState(() => window.matchMedia(query).matches)
-  useEffect(() => {
-    const mq = window.matchMedia(query)
-    const on = () => setMatch(mq.matches)
-    mq.addEventListener('change', on)
-    return () => mq.removeEventListener('change', on)
-  }, [query])
-  return match
-}
-
 function modeFor(via: Via): 'animate' | 'fade' | 'instant' {
   if (via === 'initial') return 'instant'
   if (via === 'cartridge' || via === 'pop' || via === 'eject') return 'animate'
   return 'fade'
 }
 
+// The 3D Experience Lab is a separate bundle, loaded only on /experience-lab.
+const LabApp = lazy(() => import('./lab/LabApp'))
+
 export default function App() {
+  const { route } = useRoute()
+  if (route.name === 'lab') {
+    return (
+      <Suspense fallback={<div className="lab-boot" aria-busy="true" />}>
+        <LabApp />
+      </Suspense>
+    )
+  }
+  return <ClassicApp />
+}
+
+/** The illustrated room with floating cartridges (the current site). */
+function ClassicApp() {
   const { route, state, key } = useRoute()
   const [phase, setPhase] = useState<Phase>('idle')
   const [face, setFace] = useState<FaceState>({ expression: 'neutral' })
