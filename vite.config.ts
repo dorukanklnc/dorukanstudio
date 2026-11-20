@@ -5,4 +5,6 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
   plugins: [react()],
+  // The three.js engine is its own lazy chunk (~185 KB gzip), loaded only on /experience-lab.
+  build: { chunkSizeWarningLimit: 800 },
 })

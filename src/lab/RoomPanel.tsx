@@ -17,7 +17,7 @@ export function ProjectBlock({ project, headingLevel = 2 }: { project: Project; 
       <p className="lab-summary">{project.summary}</p>
       {hero && (
         <figure className="lab-shot">
-          <img src={assetUrl(hero.src)} alt={hero.alt} loading="lazy" decoding="async" width={1600} height={1000} />
+          <img src={assetUrl(hero.src)} alt={hero.alt} decoding="async" width={1600} height={1000} />
           {hero.demo && <figcaption>Demo preview — real screenshots coming soon.</figcaption>}
         </figure>
       )}

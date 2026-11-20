@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { profile } from '../content/portfolio'
 import { linkHandler, navigate, pathFor, useRoute } from '../lib/router'
 import { useMedia } from '../lib/useMedia'
+import gsap from 'gsap'
 import { CameraRig, heroFrame, isNarrow, roomFrame } from './cameraRig'
 import type { HQEngine, Quality, RoomId } from './engine/types'
 import { QuickPortfolio } from './QuickPortfolio'
@@ -59,6 +60,13 @@ export default function LabApp() {
   useEffect(() => {
     if (roomParam && roomParam !== 'portfolio' && !station) navigate({ name: 'lab' }, { replace: true })
   }, [roomParam, station])
+
+  // Camera moves follow the wall clock: on a slow GPU they finish on time in bigger
+  // steps instead of stretching out (GSAP's default lag smoothing would slow them down).
+  useEffect(() => {
+    gsap.ticker.lagSmoothing(0)
+    return () => gsap.ticker.lagSmoothing(500, 33)
+  }, [])
 
   // Not linked from the site yet: keep it out of search results while in development.
   useEffect(() => {
@@ -303,6 +311,7 @@ export default function LabApp() {
 
           {mode === 'hub' && (
             <div className="lab-bottom">
+              {narrow && <p className="lab-intro">Eight rooms, one engineer. Tap a room below or start the tour at the security desk.</p>}
               {narrow && status === 'ready' && (
                 <ul className="lab-chips-row" aria-label="Rooms">
                   {STATIONS.map((s, i) => (

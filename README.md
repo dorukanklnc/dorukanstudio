@@ -86,3 +86,23 @@ scaled to fit the screen, so the slot and screen targets stay exact at any size.
   project becomes a short cross-fade.
 - "View projects as a list" (`/projects`) offers direct navigation using the same URLs.
 - Background motion pauses while the tab is hidden or a project is open.
+
+## Experience Lab (`/experience-lab`, in development)
+
+A 3D "Night Shift HQ": a cutaway two-floor building at night where each lit room is a part of the
+portfolio. It is not linked from the site yet and sets `noindex`; the classic room above stays the
+home page until the lab is ready.
+
+| what | where |
+| --- | --- |
+| Which room shows which projects / experience | `src/lab/stations.ts` |
+| UI: intro, pins, room panels, quick portfolio | `src/lab/LabApp.tsx`, `RoomPanel.tsx`, `QuickPortfolio.tsx`, `lab.css` |
+| Camera moves and where the subject sits on screen | `src/lab/cameraRig.ts` |
+| 3D engine (plain three.js, lazy chunk) and its contract | `src/lab/engine/` — start with `types.ts` and `index.ts` |
+| Work experience and honours shown in the About room | `profile.experience`, `profile.honors` in `src/content/portfolio.ts` |
+
+- URLs: `/experience-lab`, `/experience-lab/<room>` (e.g. `security`, `saas`), `/experience-lab/portfolio`
+  (plain HTML version; also shown automatically when WebGL isn't available).
+- Phones and low-memory devices start in a light mode (baked lighting, no post-processing); add
+  `?quality=high` or `?quality=low` to force one.
+- Engine dev page (dev server only, not built): `npm run dev`, then open `/lab-dev.html`.
