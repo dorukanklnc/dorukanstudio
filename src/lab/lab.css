@@ -207,6 +207,24 @@
   border-color: var(--cream);
 }
 
+/* ── ?debug readout ── */
+
+.lab-debug {
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
+  z-index: 50;
+  display: grid;
+  gap: 2px;
+  max-width: min(380px, calc(100vw - 20px));
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(8, 10, 18, 0.82);
+  color: #e8f0ff;
+  font: 500 11.5px/1.45 var(--mono);
+  pointer-events: none;
+}
+
 /* ── Loading ── */
 
 .lab-loading {

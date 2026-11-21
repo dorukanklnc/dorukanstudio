@@ -65,11 +65,26 @@ export interface HQEngine {
   /** Call on canvas size changes. */
   resize(width: number, height: number, dpr: number): void
   setQuality(q: Quality): void
+  /**
+   * Upper limit for the render pixel ratio (on top of the quality's own cap), so a slow
+   * GPU can keep the full look at a lower internal resolution. Infinity = no extra limit.
+   */
+  setMaxPixelRatio(max: number): void
   setReducedMotion(r: boolean): void
   /** Stop the render loop (tab hidden, Quick portfolio open). */
   setPaused(paused: boolean): void
-  /** Measured from renderer.info for the last frame. */
-  stats(): { drawCalls: number; triangles: number; lights: number; textures: number; programs: number }
+  /** Measured from renderer.info for the last frame, plus the current render settings. */
+  stats(): {
+    drawCalls: number
+    triangles: number
+    lights: number
+    textures: number
+    programs: number
+    quality: Quality
+    pixelRatio: number
+    /** GPU name as the browser reports it ('' if hidden). */
+    gpu: string
+  }
   dispose(): void
 }
 

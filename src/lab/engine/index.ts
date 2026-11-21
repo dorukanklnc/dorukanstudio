@@ -183,6 +183,21 @@ export const createHQ: CreateHQ = async (opts: HQOptions): Promise<HQEngine> => 
   let last = 0
   let time = 1.2
   const lastStats = { drawCalls: 0, triangles: 0, lights: 0, textures: 0, programs: 0 }
+  /** Extra pixel-ratio limit set by the host when the GPU is slow (see setMaxPixelRatio). */
+  let maxPR = Infinity
+  const pixelRatio = (): number => Math.min(dpr, DPR_CAP[quality], maxPR)
+  let gpuName: string | null = null
+  const gpu = (): string => {
+    if (gpuName === null) {
+      try {
+        const ext = gl.getExtension('WEBGL_debug_renderer_info')
+        gpuName = String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER) ?? '')
+      } catch {
+        gpuName = ''
+      }
+    }
+    return gpuName
+  }
   let rtLightCount = 0
   for (const c of rtLights.children) if ((c as THREE.Light).isLight) rtLightCount++
   const raycaster = new THREE.Raycaster()
@@ -195,7 +210,7 @@ export const createHQ: CreateHQ = async (opts: HQOptions): Promise<HQEngine> => 
   })
 
   const applySize = (): void => {
-    const pr = Math.min(dpr, DPR_CAP[quality])
+    const pr = pixelRatio()
     renderer.setPixelRatio(pr)
     renderer.setSize(width, height, false)
     post?.setSize(width, height, pr)
@@ -226,7 +241,7 @@ export const createHQ: CreateHQ = async (opts: HQOptions): Promise<HQEngine> => 
     renderer.shadowMap.enabled = hq && shadowLight !== null
     renderer.shadowMap.needsUpdate = true
     shared.uAddK.value = hq ? 0.7 : 1
-    if (hq && !post) post = new Post(renderer, scene, camera, width, height, Math.min(dpr, DPR_CAP.high))
+    if (hq && !post) post = new Post(renderer, scene, camera, width, height, pixelRatio())
     if (!hq && post) {
       post.dispose()
       post = null
@@ -365,6 +380,13 @@ export const createHQ: CreateHQ = async (opts: HQOptions): Promise<HQEngine> => 
       applyQuality()
       requestRender()
     },
+    setMaxPixelRatio(max: number): void {
+      const next = max > 0 ? max : Infinity
+      if (next === maxPR) return
+      maxPR = next
+      applySize()
+      requestRender()
+    },
     setReducedMotion(r: boolean): void {
       reduced = r
       applyReduced()
@@ -379,7 +401,7 @@ export const createHQ: CreateHQ = async (opts: HQOptions): Promise<HQEngine> => 
       } else requestRender()
     },
     stats() {
-      return { ...lastStats }
+      return { ...lastStats, quality, pixelRatio: renderer.getPixelRatio(), gpu: gpu() }
     },
     dispose(): void {
       if (disposed) return

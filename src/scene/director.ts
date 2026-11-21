@@ -93,6 +93,11 @@ export class SceneDirector {
   private overlayDetached = false
 
   private cam = { z: 0 }
+  /**
+   * While a settled project closes, the interface shrinks back into the console screen
+   * with the camera at rest: `z` is the overlay's own zoom (1 = fills the viewport).
+   */
+  private ov = { on: false, z: 1 }
   private fl: Flight = { ...REST }
   private look = { dim: 0, others: 0, overlay: 0, hud: 1 }
 
@@ -192,11 +197,16 @@ export class SceneDirector {
   dispose() {
     this.running = false
     document.removeEventListener('visibilitychange', this.onVisibility)
-    this.tl?.kill()
+    // Settle any in-flight sequence into its end state (the route already points there),
+    // so a remount (React StrictMode in development) never inherits a half-run sequence.
+    const tl = this.tl
+    if (tl) {
+      tl.progress(1)
+      tl.kill()
+    }
     this.tl = null
+    this.endShrink()
     this.setIdleActive(false)
-    // Settle any in-flight sequence into a consistent end state.
-    if (this.phase === 'ejecting' || this.phase === 'selecting') this.resetToRoom()
   }
 
   setReducedMotion(reduced: boolean) {
@@ -326,6 +336,7 @@ export class SceneDirector {
     const info = this.projects.get(slug)
     const resuming = this.phase === 'ejecting' && this.active === slug
     this.killTimeline()
+    this.endShrink()
     this.active = slug
     this.overlayDetached = false
     this.setOverlay(slug)
@@ -407,10 +418,13 @@ export class SceneDirector {
 
   private eject() {
     const slug = this.active
+    // A settled project has the room hidden at full zoom (up to ~9×). Pulling the camera
+    // back out from there means repainting the whole room at that scale every frame, which
+    // froze slower machines with the bare page background showing. So the room comes back
+    // at its normal size behind the interface, and the interface shrinks into the screen.
+    const shrink = this.phase === 'project' && this.cam.z >= 1 && !!this.els.overlay
     this.killTimeline()
     this.setPhase('ejecting')
-    this.setSceneVisible(true)
-    this.markCamera(true)
     this.setIdleActive(false)
 
     const els = slug ? this.carts.get(slug) : undefined
@@ -422,9 +436,27 @@ export class SceneDirector {
 
     // If the overlay was shown without the camera (fade/direct link), attach it now.
     this.overlayDetached = false
-    const zoomT = T.zoom * E * Math.max(0.35, this.cam.z)
-    tl.to(this.look, { overlay: 0, duration: zoomT * 0.45, ease: 'power1.in' }, 0)
-    tl.to(this.cam, { z: 0, duration: zoomT, ease: 'power2.inOut' }, 0)
+    let zoomT: number
+    if (shrink) {
+      zoomT = T.zoom * E
+      this.cam.z = 0
+      this.ov.on = true
+      this.ov.z = 1
+      // Its own layer, rasterised once at full size: shrinking it is then just scaling.
+      ;(this.els.overlay as HTMLElement).style.willChange = 'transform, opacity'
+      this.markCamera(false)
+      this.render()
+      this.setSceneVisible(true)
+      tl.to(this.ov, { z: 0, duration: zoomT, ease: 'power2.inOut' }, 0)
+      tl.to(this.look, { overlay: 0, duration: zoomT * 0.4, ease: 'power1.in' }, zoomT * 0.55)
+    } else {
+      // Mid-sequence: the room is already on screen at the current zoom; fly back out.
+      zoomT = T.zoom * E * Math.max(0.35, this.cam.z)
+      this.setSceneVisible(true)
+      this.markCamera(true)
+      tl.to(this.look, { overlay: 0, duration: zoomT * 0.45, ease: 'power1.in' }, 0)
+      tl.to(this.cam, { z: 0, duration: zoomT, ease: 'power2.inOut' }, 0)
+    }
     tl.to(this.look, { dim: DIM_SELECT, duration: zoomT, ease: 'power1.out' }, 0)
     tl.call(() => this.setFace({ expression: 'happy' }), [], zoomT * 0.5)
 
@@ -457,6 +489,7 @@ export class SceneDirector {
   /** Reduced motion / instant: put the room back behind the overlay, then fade the overlay out. */
   private ejectFade(instant: boolean) {
     this.killTimeline()
+    this.endShrink()
     this.setPhase('ejecting')
     const slug = this.active
     this.overlayDetached = true
@@ -490,6 +523,7 @@ export class SceneDirector {
   /** Show a project without the insertion sequence (direct link, list, reduced motion, project→project). */
   private jump(slug: string, mode: 'fade' | 'instant') {
     this.killTimeline()
+    this.endShrink()
     const fromRoom = this.cam.z < 0.5 || this.phase === 'idle'
     const prev = this.active
     const apply = () => {
@@ -552,8 +586,18 @@ export class SceneDirector {
     }
   }
 
+  /** Stop riding the overlay on its own zoom (see `ov`). */
+  private endShrink() {
+    if (!this.ov.on) return
+    this.ov.on = false
+    this.ov.z = 1
+    const overlay = this.els.overlay as HTMLElement | undefined
+    if (overlay) overlay.style.willChange = ''
+  }
+
   private resetToRoom() {
     const slug = this.active
+    this.endShrink()
     this.cam.z = 0
     this.fl = { ...REST }
     Object.assign(this.look, { dim: 0, others: 0, overlay: 0, hud: 1 })
@@ -740,9 +784,10 @@ export class SceneDirector {
       }
     }
     if (overlay) {
-      if (this.overlayDetached || z >= 1) overlay.style.transform = ''
+      const oz = this.ov.on ? this.ov.z : z
+      if (this.overlayDetached || oz >= 1) overlay.style.transform = ''
       else {
-        const o = overlayAt(this.frame, z)
+        const o = overlayAt(this.frame, oz)
         overlay.style.transform = `translate(${o.tx}px, ${o.ty}px) scale(${o.k})`
       }
       overlay.style.opacity = String(this.look.overlay)

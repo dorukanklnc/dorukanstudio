@@ -5,6 +5,7 @@ import { useMedia } from '../lib/useMedia'
 import gsap from 'gsap'
 import { CameraRig, heroFrame, isNarrow, roomFrame } from './cameraRig'
 import type { HQEngine, Quality, RoomId } from './engine/types'
+import { LabDebug } from './LabDebug'
 import { QuickPortfolio } from './QuickPortfolio'
 import { RoomPanel } from './RoomPanel'
 import { STATIONS, stationById } from './stations'
@@ -42,6 +43,11 @@ function startQuality(): Quality {
 }
 
 const FLY = 1.15
+/** Median frame time the HQ should stay under (~28 fps) before it is tuned down. */
+const SMOOTH_FRAME_MS = 36
+/** Lowest internal resolution tried before switching to the light mode. */
+const MIN_PIXEL_RATIO = 0.75
+const fpsText = (medianMs: number) => (medianMs >= 1000 ? 'under 1 fps' : `${Math.round(1000 / medianMs)} fps`)
 
 export default function LabApp() {
   const { route } = useRoute()
@@ -57,6 +63,8 @@ export default function LabApp() {
   const [progress, setProgress] = useState(0)
   const [hover, setHover] = useState<RoomId | null>(null)
   const [size, setSize] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }))
+  const [debug] = useState(() => new URLSearchParams(window.location.search).has('debug'))
+  const [tuning, setTuning] = useState('none')
 
   const roomParam = route.name === 'lab' ? route.room : undefined
   const station = stationById(roomParam)
@@ -188,34 +196,52 @@ export default function LabApp() {
     return () => document.removeEventListener('visibilitychange', sync)
   }, [engine, mode])
 
-  // Safety net only: if the full look is truly unplayable (under ~20 fps once shaders
-  // are compiled and the scene has settled), switch to the light mode. Skipped when
-  // `?quality=` is set.
-  // Measured over a 2 s window (not a frame count) so a very slow machine is caught in
-  // seconds; a tab hidden mid-measurement skips the check rather than guessing.
+  // Keeps the HQ smooth on slower GPUs, a step at a time once the scene has settled:
+  // first lower the internal resolution (same look, slightly softer), and only when even
+  // the lowest step is too slow switch to the light mode. Skipped with `?quality=`.
+  // A tab hidden mid-way stops the tuning rather than guessing.
   useEffect(() => {
     if (!engine || reduced || qualityParam()) return
     let raf = 0
-    let first = 0
-    let last = 0
-    const times: number[] = []
-    const tick = (now: number) => {
-      if (last) times.push(now - last)
-      else first = now
-      last = now
-      if (times.length < 120 && now - first < 2000) {
-        raf = requestAnimationFrame(tick)
-        return
+    let timer = 0
+    let rounds = 0
+    const measure = () => {
+      if (document.hidden) return
+      let first = 0
+      let last = 0
+      const times: number[] = []
+      const tick = (now: number) => {
+        if (last) times.push(now - last)
+        else first = now
+        last = now
+        if (times.length < 90 && now - first < 1500) {
+          raf = requestAnimationFrame(tick)
+          return
+        }
+        const sorted = times.slice(3).sort((x, y) => x - y)
+        decide(sorted.length ? sorted[Math.floor(sorted.length / 2)] : Infinity)
       }
-      const sorted = times.slice(5).sort((a, b) => a - b)
-      const median = sorted.length ? sorted[Math.floor(sorted.length / 2)] : Infinity
-      if (median > 50) engine.setQuality('low')
+      raf = requestAnimationFrame(tick)
     }
-    const start = window.setTimeout(() => {
-      if (!document.hidden) raf = requestAnimationFrame(tick)
-    }, 3000)
+    const decide = (median: number) => {
+      rounds++
+      // ~28 fps or better is fine (a 30 fps power-saving cap must not count as slow).
+      if (median <= SMOOTH_FRAME_MS || rounds >= 10) return
+      const { quality, pixelRatio } = engine.stats()
+      const next = pixelRatio * 0.8
+      if (next >= MIN_PIXEL_RATIO) {
+        engine.setMaxPixelRatio(next)
+        setTuning(`resolution lowered to ${next.toFixed(2)}× (${fpsText(median)})`)
+      } else if (quality === 'high') {
+        engine.setMaxPixelRatio(Infinity)
+        engine.setQuality('low')
+        setTuning(`switched to the light mode (${fpsText(median)} at the lowest resolution)`)
+      } else return
+      timer = window.setTimeout(measure, 600)
+    }
+    timer = window.setTimeout(measure, 3000)
     const stop = () => {
-      window.clearTimeout(start)
+      window.clearTimeout(timer)
       cancelAnimationFrame(raf)
     }
     const onVisibility = () => {
@@ -377,6 +403,8 @@ export default function LabApp() {
           )}
         </>
       )}
+
+      {debug && engine && mode !== 'portfolio' && <LabDebug engine={engine} tuning={tuning} />}
 
       {mode === 'portfolio' && (
         <QuickPortfolio
