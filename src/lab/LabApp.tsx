@@ -21,15 +21,24 @@ function hasWebGL() {
   }
 }
 
-/** Phones and low-memory devices start in the light mode; `?quality=high|low` overrides. */
-function detectQuality(): Quality {
+/** `?quality=high|low`, when present, is an explicit choice for testing. */
+function qualityParam(): Quality | null {
   const q = new URLSearchParams(window.location.search).get('quality')
-  if (q === 'high' || q === 'low') return q
+  return q === 'high' || q === 'low' ? q : null
+}
+
+/** Desktops and laptops get the full look; phones and very weak machines start in the light mode. */
+function startQuality(): Quality {
+  const param = qualityParam()
+  if (param) return param
   const nav = navigator as Navigator & { deviceMemory?: number }
-  const coarse = window.matchMedia('(pointer: coarse)').matches
-  const small = Math.min(window.innerWidth, window.innerHeight) < 700
-  if ((coarse && small) || (nav.deviceMemory ?? 8) <= 4 || (navigator.hardwareConcurrency ?? 8) <= 4) return 'low'
-  return 'high'
+  const memory = nav.deviceMemory ?? 8
+  const cores = navigator.hardwareConcurrency ?? 8
+  if (window.matchMedia('(pointer: coarse)').matches) {
+    const small = Math.min(window.innerWidth, window.innerHeight) < 700
+    return small || memory <= 4 ? 'low' : 'high'
+  }
+  return memory <= 2 || cores <= 2 ? 'low' : 'high'
 }
 
 const FLY = 1.15
@@ -117,7 +126,7 @@ export default function LabApp() {
     stageRef.current?.prepend(canvas)
     import('./engine')
       .then(({ createHQ }) =>
-        createHQ({ canvas, quality: detectQuality(), reducedMotion: reducedRef.current, onProgress: (p) => !disposed && setProgress(p) }),
+        createHQ({ canvas, quality: startQuality(), reducedMotion: reducedRef.current, onProgress: (p) => !disposed && setProgress(p) }),
       )
       .then((e) => {
         if (disposed) {
@@ -179,25 +188,43 @@ export default function LabApp() {
     return () => document.removeEventListener('visibilitychange', sync)
   }, [engine, mode])
 
-  // If the first seconds are slow, drop to the light mode.
+  // Safety net only: if the full look is truly unplayable (under ~20 fps once shaders
+  // are compiled and the scene has settled), switch to the light mode. Skipped when
+  // `?quality=` is set.
+  // Measured over a 2 s window (not a frame count) so a very slow machine is caught in
+  // seconds; a tab hidden mid-measurement skips the check rather than guessing.
   useEffect(() => {
-    if (!engine || reduced || new URLSearchParams(window.location.search).get('quality')) return
+    if (!engine || reduced || qualityParam()) return
     let raf = 0
-    let last = performance.now()
+    let first = 0
+    let last = 0
     const times: number[] = []
     const tick = (now: number) => {
-      times.push(now - last)
+      if (last) times.push(now - last)
+      else first = now
       last = now
-      if (times.length < 90) raf = requestAnimationFrame(tick)
-      else {
-        const sorted = times.slice(10).sort((a, b) => a - b)
-        if (sorted[Math.floor(sorted.length / 2)] > 30) engine.setQuality('low')
+      if (times.length < 120 && now - first < 2000) {
+        raf = requestAnimationFrame(tick)
+        return
       }
+      const sorted = times.slice(5).sort((a, b) => a - b)
+      const median = sorted.length ? sorted[Math.floor(sorted.length / 2)] : Infinity
+      if (median > 50) engine.setQuality('low')
     }
-    const start = window.setTimeout(() => (raf = requestAnimationFrame(tick)), 1200)
-    return () => {
+    const start = window.setTimeout(() => {
+      if (!document.hidden) raf = requestAnimationFrame(tick)
+    }, 3000)
+    const stop = () => {
       window.clearTimeout(start)
       cancelAnimationFrame(raf)
+    }
+    const onVisibility = () => {
+      if (document.hidden) stop()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      stop()
+      document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [engine, reduced])
 

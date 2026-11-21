@@ -778,13 +778,16 @@
     padding: 8px 14px;
     font-size: 16px;
   }
-  .lab-nav a:last-child {
-    display: none;
+  .lab-nav {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
   }
   .lab-nav a {
-    min-height: 40px;
-    padding: 6px 11px;
+    min-height: 36px;
+    padding: 5px 11px;
     font-size: 12px;
+    white-space: nowrap;
   }
   .lab-cta {
     flex-wrap: nowrap;
