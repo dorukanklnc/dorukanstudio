@@ -23,6 +23,8 @@ import { yieldToMain } from './yield'
 export type { CameraPose, FrameRect, HQEngine, HQOptions, Quality, RoomId } from './types'
 
 const DPR_CAP: Record<Quality, number> = { high: 2, low: 1.5 }
+/** Rendered pixels the HQ aims for at the start (about a 2560×1440 screen). */
+const PIXEL_BUDGET = 3.7e6
 const loseExt = new WeakMap<HTMLCanvasElement, WEBGL_lose_context>()
 /** Resolves once the 'webglcontextlost' event of a deliberate dispose() has been handled. */
 const lostEvent = new WeakMap<HTMLCanvasElement, Promise<void>>()
@@ -185,7 +187,10 @@ export const createHQ: CreateHQ = async (opts: HQOptions): Promise<HQEngine> => 
   const lastStats = { drawCalls: 0, triangles: 0, lights: 0, textures: 0, programs: 0 }
   /** Extra pixel-ratio limit set by the host when the GPU is slow (see setMaxPixelRatio). */
   let maxPR = Infinity
-  const pixelRatio = (): number => Math.min(dpr, DPR_CAP[quality], maxPR)
+  // Big high-DPI screens start below their full ratio (a 2× laptop panel is ~6 MP),
+  // but the budget never pushes a screen below 1×.
+  const pixelRatio = (): number =>
+    Math.min(dpr, DPR_CAP[quality], maxPR, Math.max(1, Math.sqrt(PIXEL_BUDGET / Math.max(1, width * height))))
   let gpuName: string | null = null
   const gpu = (): string => {
     if (gpuName === null) {

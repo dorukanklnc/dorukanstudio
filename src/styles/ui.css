@@ -153,6 +153,26 @@
   background: var(--console);
 }
 
+/* Link to the 3D Experience Lab: the night-time HQ, so a night-blue pill with a lit window. */
+.hud-nav a.hud-nav-3d {
+  gap: 8px;
+  background: #1d2742;
+  color: #fff6df;
+}
+
+.hud-nav a.hud-nav-3d::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mustard);
+  box-shadow: 0 0 6px var(--mustard);
+}
+
+.nav-short {
+  display: none;
+}
+
 .hud-bottom {
   position: absolute;
   inset: auto 0 0;
@@ -287,6 +307,15 @@
   .hud-nav a:first-child {
     display: none;
   }
+  .hud-nav a.hud-nav-3d {
+    gap: 6px;
+  }
+  .nav-long {
+    display: none;
+  }
+  .nav-short {
+    display: inline;
+  }
   .hud-bottom {
     padding: 0 10px max(12px, env(safe-area-inset-bottom));
   }
@@ -301,6 +330,25 @@
     display: block;
     margin: 4px 0 0;
     padding: 4px 0;
+  }
+}
+
+/* Narrow phones (~360 px): keep the name on one line and all three pills in one row. */
+@media (max-width: 380px) {
+  .hud-top {
+    gap: 8px;
+  }
+  .brand {
+    padding: 6px 9px 7px;
+  }
+  .brand-name {
+    white-space: nowrap;
+  }
+  .hud-nav {
+    gap: 4px;
+  }
+  .hud-nav a {
+    padding: 4px 7px;
   }
 }
 

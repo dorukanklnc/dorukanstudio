@@ -43,8 +43,10 @@ function startQuality(): Quality {
 }
 
 const FLY = 1.15
-/** Median frame time the HQ should stay under (~28 fps) before it is tuned down. */
-const SMOOTH_FRAME_MS = 36
+/** Median frame time the HQ aims for (~50 fps); slower than this, it lowers the resolution. */
+const SMOOTH_FRAME_MS = 20
+/** Still slower than this (~28 fps) at the lowest resolution → the light mode. */
+const SLOW_FRAME_MS = 36
 /** Lowest internal resolution tried before switching to the light mode. */
 const MIN_PIXEL_RATIO = 0.75
 const fpsText = (medianMs: number) => (medianMs >= 1000 ? 'under 1 fps' : `${Math.round(1000 / medianMs)} fps`)
@@ -64,7 +66,7 @@ export default function LabApp() {
   const [hover, setHover] = useState<RoomId | null>(null)
   const [size, setSize] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }))
   const [debug] = useState(() => new URLSearchParams(window.location.search).has('debug'))
-  const [tuning, setTuning] = useState('none')
+  const [tuning, setTuning] = useState('measuring…')
 
   const roomParam = route.name === 'lab' ? route.room : undefined
   const station = stationById(roomParam)
@@ -85,7 +87,7 @@ export default function LabApp() {
     return () => gsap.ticker.lagSmoothing(500, 33)
   }, [])
 
-  // Not linked from the site yet: keep it out of search results while in development.
+  // The classic site stays the indexed version; the HQ shows the same content again.
   useEffect(() => {
     const meta = document.createElement('meta')
     meta.name = 'robots'
@@ -196,9 +198,10 @@ export default function LabApp() {
     return () => document.removeEventListener('visibilitychange', sync)
   }, [engine, mode])
 
-  // Keeps the HQ smooth on slower GPUs, a step at a time once the scene has settled:
-  // first lower the internal resolution (same look, slightly softer), and only when even
-  // the lowest step is too slow switch to the light mode. Skipped with `?quality=`.
+  // Keeps the HQ smooth, a step at a time once the scene has settled: below ~50 fps it
+  // lowers the internal resolution (same look, slightly softer) as long as that actually
+  // helps, and only when even the lowest step is under ~28 fps does it switch to the
+  // light mode. Skipped with `?quality=`.
   // A tab hidden mid-way stops the tuning rather than guessing.
   useEffect(() => {
     if (!engine || reduced || qualityParam()) return
@@ -223,20 +226,38 @@ export default function LabApp() {
       }
       raf = requestAnimationFrame(tick)
     }
+    // The step before the current one, to undo a resolution drop that did not help
+    // (a frame-rate cap such as a 30 fps power-saving mode, or a CPU-bound machine).
+    let before: { median: number; limit: number; ratio: number } | null = null
+    let limit = Infinity
     const decide = (median: number) => {
       rounds++
-      // ~28 fps or better is fine (a 30 fps power-saving cap must not count as slow).
-      if (median <= SMOOTH_FRAME_MS || rounds >= 10) return
       const { quality, pixelRatio } = engine.stats()
+      if (before && median > before.median * 0.9) {
+        engine.setMaxPixelRatio(before.limit)
+        setTuning(`kept ${before.ratio.toFixed(2)}× (a lower resolution did not help: ${fpsText(median)})`)
+        return
+      }
+      if (median <= SMOOTH_FRAME_MS || rounds >= 10) {
+        setTuning(`${median <= SMOOTH_FRAME_MS ? 'smooth' : 'stopped'} at ${pixelRatio.toFixed(2)}× (${fpsText(median)})`)
+        return
+      }
       const next = pixelRatio * 0.8
       if (next >= MIN_PIXEL_RATIO) {
+        before = { median, limit, ratio: pixelRatio }
+        limit = next
         engine.setMaxPixelRatio(next)
-        setTuning(`resolution lowered to ${next.toFixed(2)}× (${fpsText(median)})`)
-      } else if (quality === 'high') {
+        setTuning(`resolution lowered to ${next.toFixed(2)}× (was ${fpsText(median)})`)
+      } else if (quality === 'high' && median > SLOW_FRAME_MS) {
+        before = null
+        limit = Infinity
         engine.setMaxPixelRatio(Infinity)
         engine.setQuality('low')
         setTuning(`switched to the light mode (${fpsText(median)} at the lowest resolution)`)
-      } else return
+      } else {
+        setTuning(`lowest resolution reached (${fpsText(median)})`)
+        return
+      }
       timer = window.setTimeout(measure, 600)
     }
     timer = window.setTimeout(measure, 3000)

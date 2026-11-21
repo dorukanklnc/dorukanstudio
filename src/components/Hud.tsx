@@ -43,6 +43,10 @@ export function Hud({ hudRef, hovered, interactive, touch, page, pages, onPage, 
               {n.label}
             </a>
           ))}
+          <a className="hud-nav-3d" href={pathFor({ name: 'lab' })} onClick={linkHandler({ name: 'lab' })} aria-label="Explore in 3D">
+            <span className="nav-long">Explore in 3D</span>
+            <span className="nav-short">3D</span>
+          </a>
         </nav>
       </header>
 
