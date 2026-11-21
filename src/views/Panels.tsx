@@ -94,6 +94,44 @@ export function AboutPanel({ onClose }: { onClose: () => void }) {
           ))}
         </dl>
       )}
+      {profile.experience && profile.experience.length > 0 && (
+        <section className="about-experience" aria-labelledby="about-exp">
+          <h3 id="about-exp">Experience</h3>
+          {profile.experience.map((e) => (
+            <article key={e.company} className="exp">
+              <h4>
+                {e.title} <span className="exp-company">· {e.company}</span>
+              </h4>
+              <p className="exp-meta">
+                {e.period}
+                {e.location ? ` · ${e.location}` : ''}
+              </p>
+              <ul className="exp-points">
+                {e.points.map((pt) => (
+                  <li key={pt}>{pt}</li>
+                ))}
+              </ul>
+              {e.technologies && (
+                <ul className="chips chips-small" aria-label="Technologies">
+                  {e.technologies.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          ))}
+        </section>
+      )}
+      {profile.honors && profile.honors.length > 0 && (
+        <section aria-labelledby="about-honors">
+          <h3 id="about-honors">Honors</h3>
+          <ul className="exp-points">
+            {profile.honors.map((h) => (
+              <li key={h}>{h}</li>
+            ))}
+          </ul>
+        </section>
+      )}
       {profile.skillGroups && profile.skillGroups.length > 0 ? (
         <div className="skill-groups">
           {profile.skillGroups.map((g) => (
